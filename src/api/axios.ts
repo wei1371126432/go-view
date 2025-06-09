@@ -4,7 +4,7 @@ import { PageEnum, ErrorPageNameMap } from '@/enums/pageEnum'
 import { StorageEnum } from '@/enums/storageEnum'
 import { axiosPre } from '@/settings/httpSetting'
 import { SystemStoreEnum, SystemStoreUserInfoEnum } from '@/store/modules/systemStore/systemStore.d'
-import { redirectErrorPage, getLocalStorage, routerTurnByName, isPreview, getCookie } from '@/utils'
+import { redirectErrorPage, getLocalStorage, setLocalStorage,clearLocalStorage, routerTurnByName, isPreview, getCookie } from '@/utils'
 import { fetchAllowList } from './axios.config'
 import includes from 'lodash/includes'
 
@@ -25,13 +25,42 @@ const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // 白名单校验
-    let cookieList = document.cookie.split(';');
-    let _wzToken = cookieList.filter( e => e.includes('tokenName'))[0];
-    let strWzToken = _wzToken.split('=')[1].replaceAll('%2C',',');
-    config.headers['Wz-Token'] = strWzToken;
+    let fhToken = getLocalStorage('FH-Token')
+    let urlFhToken = ''
 
-    console.log('config = ', config);
+    // 先从hash中获取token
+    const hashPart = window.location.hash
+    const queryIndex = hashPart.indexOf('?')
+    if (queryIndex !== -1) {
+      const queryString = hashPart.substring(queryIndex + 1)
+      const hashParams = new URLSearchParams(queryString)
+      const hashFhToken = hashParams.get('FH-Token')
+      if (hashFhToken) {
+        urlFhToken = decodeURIComponent(hashFhToken)
+      }
+    }
+
+    // 如果hash没有，再从search中获取
+    if (!urlFhToken && window.location.search) {
+      const searchParams = new URLSearchParams(window.location.search)
+      const searchFhToken = searchParams.get('FH-Token')
+      if (searchFhToken) {
+        urlFhToken = decodeURIComponent(searchFhToken)
+      }
+    }
+
+    // 如果url上有token，且和本地不一样，则用url上的并覆盖本地
+    if (urlFhToken) {
+      if (fhToken !== urlFhToken) {
+        fhToken = urlFhToken
+        setLocalStorage('FH-Token', fhToken)
+        console.log('从URL获取并覆盖本地FH-Token:', fhToken)
+      }
+    }
+
+    if (fhToken) {
+      config.headers['FH-Token'] = fhToken
+    }
     if (includes(fetchAllowList, config.url)) return config
     // 获取 token
     const info = getLocalStorage(StorageEnum.GO_SYSTEM_STORE)

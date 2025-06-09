@@ -16,100 +16,7 @@
       </aside>
     </div>
     <layout-header></layout-header>
-    <div class="go-login">
-      <div class="go-login-carousel">
-        <n-carousel
-          autoplay
-          dot-type="line"
-          :interval="Number(carouselInterval)"
-        >
-          <img
-            v-for="(item, i) in carouselImgList"
-            :key="i"
-            class="go-login-carousel-img"
-            :src="getImageUrl(item, 'login')"
-            alt="image"
-          />
-        </n-carousel>
-      </div>
-      <div class="login-account">
-        <div class="login-account-container">
-          <n-collapse-transition :appear="true" :show="show">
-            <n-card class="login-account-card" :title="$t('login.desc')">
-              <div class="login-account-top">
-                <img
-                  class="login-account-top-logo"
-                  src="~@/assets/images/login/input.png"
-                  alt="展示图片"
-                />
-              </div>
-              <n-form
-                ref="formRef"
-                label-placement="left"
-                size="large"
-                :model="formInline"
-                :rules="rules"
-              >
-                <n-form-item path="username">
-                  <n-input
-                    v-model:value="formInline.username"
-                    type="text"
-                    maxlength="16"
-                    :placeholder="$t('global.form_account')"
-                    @keydown.enter="handleSubmit"
-                  >
-                    <template #prefix>
-                      <n-icon size="18">
-                        <PersonOutlineIcon></PersonOutlineIcon>
-                      </n-icon>
-                    </template>
-                  </n-input>
-                </n-form-item>
-                <n-form-item path="password">
-                  <n-input
-                    v-model:value="formInline.password"
-                    type="password"
-                    maxlength="16"
-                    show-password-on="click"
-                    :placeholder="$t('global.form_password')"
-                    @keydown.enter="handleSubmit"
-                  >
-                    <template #prefix>
-                      <n-icon size="18">
-                        <LockClosedOutlineIcon></LockClosedOutlineIcon>
-                      </n-icon>
-                    </template>
-                  </n-input>
-                </n-form-item>
-                <n-form-item>
-                  <div class="flex justify-between">
-                    <div class="flex-initial">
-                      <n-checkbox v-model:checked="autoLogin">{{
-                        $t('login.form_auto')
-                      }}</n-checkbox>
-                    </div>
-                  </div>
-                </n-form-item>
-                <n-form-item>
-                  <n-button
-                    type="primary"
-                    @click="handleSubmit"
-                    size="large"
-                    :loading="loading"
-                    block
-                    >{{ $t('login.form_button') }}</n-button
-                  >
-                </n-form-item>
-              </n-form>
-            </n-card>
-          </n-collapse-transition>
-        </div>
-      </div>
-    </div>
 
-    <div class="go-login-box-footer">
-      <layout-footer></layout-footer>
-    </div>
   </div>
 </template>
 
@@ -255,6 +162,12 @@ onMounted(() => {
   }, 100)
 
   shuffleHandle()
+
+  // 读取环境变量
+  const redirectUrl = import.meta.env.VITE_LOGIN_REDIRECT_URL
+  if (redirectUrl) {
+    window.location.replace(redirectUrl)
+  }
 })
 </script>
 

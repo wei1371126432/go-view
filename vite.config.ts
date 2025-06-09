@@ -46,14 +46,11 @@ export default ({ mode }) => defineConfig({
     open: true,
     port: 3000,
     proxy: {
-      [axiosPre]: {
-        // @ts-ignore
-        target: loadEnv(mode, process.cwd()).VITE_DEV_PATH,
+      '/api': {
+        target: 'https://rcxt.fujiansoft.com/people-system', // 修改为实际的API服务地址
         changeOrigin: true,
-        ws: true,
-        secure: true,
-      }
-    }
+      },
+    },
   },
   define: {
     // enable hydration mismatch details in production build
